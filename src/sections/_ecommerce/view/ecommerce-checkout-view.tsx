@@ -30,8 +30,11 @@ import EcommerceCheckoutShippingMethod from '../checkout/ecommerce-checkout-ship
 import EcommerceCheckoutShippingDetails from '../checkout/ecommerce-checkout-shipping-details';
 import EcommerceCheckoutPersonalDetails from '../checkout/ecommerce-checkout-personal-details';
 import { useContext, useEffect, useState } from 'react';
-import { CartContext } from 'src/contexts/cart-context';
+import { CartContext, CartTriggerContext } from 'src/contexts/cart-context';
 import { CartItemProps } from 'src/types/cart';
+import { PaymentMethod, PaymentStatus, ShippingMethod } from 'src/types/order';
+import { MakeOrder } from 'src/apis/order/make-order-api';
+import { deleteCart } from 'src/apis/carts/delete-cart';
 
 // ----------------------------------------------------------------------
 
@@ -53,21 +56,23 @@ const SHIPPING_OPTIONS = [
 const PAYMENT_OPTIONS = [
   {
     label: 'ZaloPay',
-    value: 'zalopay',
+    value: 'zalo_pay',
   },
   {
-    label: 'Cash On Delivery',
-    value: 'cashOnDelivery',
-    // description: '',
+    label: 'COD',
+    value: 'cod',
   },
 ];
 
 // ----------------------------------------------------------------------
 
 export default function EcommerceCheckoutView() {
-
-  const { cartItems } = useContext(CartContext);
+  const { cartItems, dispatch } = useContext(CartContext);
+  const { setTrigger }: any = useContext(CartTriggerContext);
   const [total, setTotal] = useState(0);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   useEffect(() => {
     const newTotal = cartItems?.reduce(
@@ -89,19 +94,25 @@ export default function EcommerceCheckoutView() {
     phoneNumber: Yup.string().required('Phone number is required'),
     streetAddress: Yup.string().required('Street address is required'),
     city: Yup.string().required('City is required'),
+    shipping: Yup.string()
+      .oneOf(SHIPPING_OPTIONS.map((option) => option.value))
+      .required('Shipping method is required'),
+    paymentMethods: Yup.string()
+      .oneOf(PAYMENT_OPTIONS.map((option) => option.value))
+      .required('Payment method is required'),
   });
 
   const defaultValues = {
-    firstName: 'Yasa',
-    lastName: 'Test',
-    emailAddress: 'demoyasa@yahoo.com',
-    phoneNumber: '123-456-7890',
+    firstName: '',
+    lastName: '',
+    emailAddress: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: '',
     streetAddress: '',
     city: '',
-    shipping: 'free',
-    paymentMethods: 'Cash on Delivery (COD)',
+    shipping: SHIPPING_OPTIONS[0].value,
+    paymentMethods: PAYMENT_OPTIONS[0].value,
     newCard: {
       cardNumber: '',
       cardHolder: '',
@@ -123,12 +134,34 @@ export default function EcommerceCheckoutView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      router.push(paths.eCommerce.orderCompleted);
-      console.log('DATA', data);
+      const orderData = {
+        shippingAddress: data.streetAddress,
+        shippingCity: data.city,
+        recipientFirstName: data.firstName,
+        recipientLastName: data.lastName,
+        recipientPhone: data.phoneNumber,
+        recipientEmail: data.emailAddress,
+        shippingMethod: data.shipping,
+        paymentMethod: data.paymentMethods,
+        paymentStatus: PaymentStatus.PENDING,
+      };
+
+      const makeOrderResponse = await MakeOrder(orderData);
+
+      console.log('Đặt hàng thành công:', makeOrderResponse);
+      setSnackbarMessage('Đặt hàng thành công!');
+      setSnackbarOpen(true);
+      setTimeout(async () => {
+        await deleteCart(cartItems[0].id as string);
+        dispatch({ type: "DELETE_CART_ITEM", payload: cartItems[0].id as string })
+        setTrigger(Math.random())
+        router.push(paths.eCommerce.orderCompleted);
+      }, 1000);
     } catch (error) {
       console.error(error);
+      setSnackbarMessage('Đã xảy ra lỗi khi đặt hàng!');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
   });
 

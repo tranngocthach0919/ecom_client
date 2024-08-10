@@ -17,16 +17,18 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 
 import { IProductOrderProps } from 'src/types/product';
+import { ListOrderRes } from 'src/types/order';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IProductOrderProps;
+  row: ListOrderRes;
   selected: boolean;
   onSelectRow: VoidFunction;
 };
 
 export default function EcommerceAccountOrdersTableRow({ row, onSelectRow, selected }: Props) {
+ 
   const [open, setOpen] = useState<HTMLButtonElement | null>(null);
 
   const handleOpen = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
@@ -43,6 +45,7 @@ export default function EcommerceAccountOrdersTableRow({ row, onSelectRow, selec
       bgcolor: 'action.selected',
     },
   };
+  
 
   return (
     <>
@@ -52,17 +55,17 @@ export default function EcommerceAccountOrdersTableRow({ row, onSelectRow, selec
         </TableCell>
 
         <TableCell sx={{ px: 1 }}>
-          <InputBase value={row.orderId} sx={inputStyles} />
+          <InputBase value={row.id} sx={inputStyles} />
         </TableCell>
 
         <TableCell sx={{ px: 1 }}>
-          <InputBase value={row.item} sx={inputStyles} />
+          <InputBase value={row.items?.map(item => item.name)} sx={inputStyles} />
         </TableCell>
 
-        <TableCell>{fDate(row.deliveryDate)}</TableCell>
+        <TableCell>{fDate(row.updated_at)}</TableCell>
 
         <TableCell sx={{ px: 1 }}>
-          <InputBase value={fCurrency(row.price)} sx={inputStyles} />
+          <InputBase value={fCurrency(row.items?.reduce((acc, item) => acc + (Number(item.price) * Number(item.quantity)), 0))} sx={inputStyles} />
         </TableCell>
 
         <TableCell>

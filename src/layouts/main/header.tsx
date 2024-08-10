@@ -24,6 +24,9 @@ import { HEADER } from '../config-layout';
 import { navConfig } from './config-navigation';
 import NavDesktop from './nav/desktop';
 import NavMobile from './nav/mobile';
+import { fetchProfile } from 'src/apis/users/user-profile-api';
+import { Alert, Button, Snackbar } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 // ----------------------------------------------------------------------
 
@@ -34,6 +37,8 @@ type Props = {
 export default function Header({ headerOnDark }: Props) {
   const { dispatch } = useContext(CartContext);
   const [cartQuantity, setCartQuantity] = useState(0);
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const { trigger }: any = useContext(CartTriggerContext)
 
@@ -52,6 +57,19 @@ export default function Header({ headerOnDark }: Props) {
   useEffect(() => {
     fetchData()
   }, [trigger]);
+
+  const hanleClickUserBtn = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    try {
+      await fetchProfile();
+      router.push(paths.eCommerce.account.personal)
+    } catch (error) {
+      if (error.response.status === 401) {
+        setOpen(true);
+      }
+    }
+  }
+
 
   const theme = useTheme();
 
@@ -104,11 +122,12 @@ export default function Header({ headerOnDark }: Props) {
           </Badge>
 
           <IconButton
-            component={RouterLink}
-            href={paths.eCommerce.account.personal}
+            // component={RouterLink}
+            // href={paths.eCommerce.account.personal}
             size="small"
             color="inherit"
             sx={{ p: 0 }}
+            onClick={hanleClickUserBtn}
           >
             <Iconify icon="carbon:user" width={24} />
           </IconButton>
@@ -121,6 +140,19 @@ export default function Header({ headerOnDark }: Props) {
 
   return (
     <>
+      <Snackbar
+        open={open}
+        autoHideDuration={2000}
+        onClose={() => setOpen(false)}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <Alert onClose={() => setOpen(false)} severity="error" sx={{ width: '100%' }}>
+          Bạn cần phải đăng nhập để truy cập trang cá nhân <Button onClick={() => router.push('/login')}>Đăng nhập</Button>
+        </Alert>
+      </Snackbar>
       <AppBar>
         <Toolbar
           disableGutters

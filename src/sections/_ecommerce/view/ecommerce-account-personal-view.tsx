@@ -1,24 +1,23 @@
 'use client';
 
-import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import * as Yup from 'yup';
 
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
-import InputAdornment from '@mui/material/InputAdornment';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import Iconify from 'src/components/iconify';
-import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
-import { fetchProfile } from 'src/apis/users/user-profile-api';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { fetchOrders } from 'src/apis/order/order-list';
 import { updateProfile } from 'src/apis/users/update-profile-api';
+import { fetchProfile } from 'src/apis/users/user-profile-api';
+import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import { Alert, Button, Snackbar } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -27,6 +26,12 @@ const GENDER_OPTIONS = ['Male', 'Female', 'Other'];
 // ----------------------------------------------------------------------
 
 export default function EcommerceAccountPersonalView() {
+  const loading = useBoolean(true);
+
+  useEffect(() => {
+    loading.onFalse();
+  }, []);
+
   const passwordShow = useBoolean();
 
   const EcommerceAccountPersonalSchema = Yup.object().shape({
@@ -51,7 +56,7 @@ export default function EcommerceAccountPersonalView() {
     lastName: '',
     email: '',
     phone: '',
-    birthday: null,
+    birthday: '',
     gender: '',
     address: '',
     // oldPassword: '',
@@ -131,62 +136,14 @@ export default function EcommerceAccountPersonalView() {
 
         <RHFTextField name="address" label="Address" />
       </Box>
-      <Stack spacing={3} sx={{ my: 5 }}>
-        <Typography variant="h5"> Change Password </Typography>
 
-        <Stack spacing={2.5}>
-          <RHFTextField
-            name="oldPassword"
-            label="Old Password"
-            type={passwordShow.value ? 'text' : 'password'}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={passwordShow.onToggle} edge="end">
-                    <Iconify icon={passwordShow.value ? 'carbon:view' : 'carbon:view-off'} />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <RHFTextField
-            name="newPassword"
-            label="New Password"
-            type={passwordShow.value ? 'text' : 'password'}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={passwordShow.onToggle} edge="end">
-                    <Iconify icon={passwordShow.value ? 'carbon:view' : 'carbon:view-off'} />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <RHFTextField
-            name="confirmNewPassword"
-            label="Confirm New Password"
-            type={passwordShow.value ? 'text' : 'password'}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={passwordShow.onToggle} edge="end">
-                    <Iconify icon={passwordShow.value ? 'carbon:view' : 'carbon:view-off'} />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Stack>
-      </Stack>
       <LoadingButton
         color="inherit"
         size="large"
         type="submit"
         variant="contained"
         loading={isSubmitting}
+        sx={{ mt: 3 }}
       >
         Save Changes
       </LoadingButton>

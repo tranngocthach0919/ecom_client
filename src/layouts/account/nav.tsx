@@ -1,24 +1,26 @@
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import Drawer from '@mui/material/Drawer';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
-import { alpha } from '@mui/material/styles';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemIcon from '@mui/material/ListItemIcon';
+import Drawer from '@mui/material/Drawer';
+import Link from '@mui/material/Link';
 import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Stack from '@mui/material/Stack';
+import { alpha } from '@mui/material/styles';
 
-import { paths } from 'src/routes/paths';
-import { useActiveLink } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
+import { useActiveLink, useRouter } from 'src/routes/hooks';
+import { paths } from 'src/routes/paths';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { _mock } from 'src/_mock';
 
+import { useEffect, useState } from 'react';
 import Iconify from 'src/components/iconify';
 import TextMaxLine from 'src/components/text-max-line';
-import { useEffect } from 'react';
+import { fetchProfile } from 'src/apis/users/user-profile-api';
+import { Profile } from 'src/types/user';
 
 // ----------------------------------------------------------------------
 
@@ -49,8 +51,23 @@ type Props = {
 
 export default function Nav({ open, onClose }: Props) {
   const mdUp = useResponsive('up', 'md');
+  const router = useRouter();
 
-  useEffect(() => {});
+  const [user, setUser] = useState<Profile>();
+
+  const fetchData = async () => {
+    try {
+      const response = await fetchProfile();
+      setUser(response.data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };  
+
+  useEffect(() => {
+    fetchData();
+  }, []); 
+
 
   const renderContent = (
     <Stack
@@ -66,7 +83,7 @@ export default function Nav({ open, onClose }: Props) {
     >
       <Stack spacing={2} sx={{ p: 3, pb: 2 }}>
         <Stack spacing={2} direction="row" alignItems="center">
-          <Avatar src={_mock.image.avatar(0)} sx={{ width: 64, height: 64 }} />
+          <Avatar src={(user as Profile)?.avatar ?? ''} sx={{ width: 64, height: 64 }} />
           <Stack
             direction="row"
             alignItems="center"
@@ -83,10 +100,10 @@ export default function Nav({ open, onClose }: Props) {
 
         <Stack spacing={0.5}>
           <TextMaxLine variant="subtitle1" line={1}>
-            Jayvion Simon
+          {(user as Profile)?.firstName as string} {(user as Profile)?.lastName as string} 
           </TextMaxLine>
           <TextMaxLine variant="body2" line={1} sx={{ color: 'text.secondary' }}>
-            nannie_abernathy70@yahoo.com
+            {(user as Profile)?.email as string}
           </TextMaxLine>
         </Stack>
       </Stack>
@@ -108,6 +125,7 @@ export default function Nav({ open, onClose }: Props) {
             height: 44,
             borderRadius: 1,
           }}
+          onClick={() => router.push(paths.login)}
         >
           <ListItemIcon>
             <Iconify icon="carbon:logout" />

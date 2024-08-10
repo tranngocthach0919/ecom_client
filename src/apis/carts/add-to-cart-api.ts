@@ -12,18 +12,14 @@ export const AddToCart = async (cart: AddToCartProps) => {
       },
     });
     return response.data.data;
-
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       if (error.response.status === 401) {
-        // localStorage.removeItem('token'); 
-        // alert("Bạn cần phải đăng nhập để thêm sản phẩm vào giỏ hàng!")
-        // window.location.href = '/login'
-        return;
+        throw error;
       }
     }
 
-    console.error('Error add to cart:', error);
-    throw error; 
+    console.error('Error fetching cart:', error);
+    throw error;
   }
-};
+}

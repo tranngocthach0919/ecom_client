@@ -81,8 +81,10 @@ export default function EcommerceProductDetailsInfo({
       };
 
       addToCart(addCartData);
+      const cartsList = await fetchCarts();
+      dispatch({ type: "SET_CART_ITEMS", payload: cartsList });
     } catch (error) {
-      if (error.response && error.response.status === 401) {
+      if (error.response.status === 401) {
         setOpen(true);
       }
     }
@@ -101,7 +103,7 @@ export default function EcommerceProductDetailsInfo({
     <>
       <Snackbar
         open={open}
-        autoHideDuration={1000}
+        autoHideDuration={2000}
         onClose={() => setOpen(false)}
         anchorOrigin={{
           vertical: 'top',

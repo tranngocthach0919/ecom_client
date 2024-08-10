@@ -35,7 +35,6 @@ export const fetchCarts = async () => {
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       if (error.response.status === 401) { 
-        localStorage.removeItem('token'); 
         throw error;
       }
     }

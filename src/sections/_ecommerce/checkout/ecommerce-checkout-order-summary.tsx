@@ -1,24 +1,23 @@
+import LoadingButton from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Stack, { StackProps } from '@mui/material/Stack';
 import { alpha } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import LoadingButton from '@mui/lab/LoadingButton';
-import Stack, { StackProps } from '@mui/material/Stack';
-import InputAdornment from '@mui/material/InputAdornment';
 
 import { fCurrency } from 'src/utils/format-number';
 
-import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
+import Image from 'src/components/image';
 import TextMaxLine from 'src/components/text-max-line';
 
-import { IProductItemProps } from 'src/types/product';
-import { CartItemProps } from 'src/types/cart';
 import { useContext, useState } from 'react';
-import { CartContext, CartTriggerContext } from 'src/contexts/cart-context';
+import { CartContext } from 'src/contexts/cart-context';
+import { CartItemProps } from 'src/types/cart';
 
 // ----------------------------------------------------------------------
 
@@ -97,6 +96,7 @@ export default function EcommerceCheckoutOrderSummary({
         color="inherit"
         type="submit"
         loading={loading}
+        disabled={carts.length === 0}
       >
         Order Now
       </LoadingButton>

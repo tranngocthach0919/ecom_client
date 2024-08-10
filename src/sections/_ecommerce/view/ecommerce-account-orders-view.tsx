@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -19,7 +19,7 @@ import TablePagination from '@mui/material/TablePagination';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 
-import { _productsTable } from 'src/_mock';
+// import { _productsTable } from 'src/_mock';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -28,6 +28,8 @@ import { stableSort, getComparator } from '../account/utils';
 import EcommerceAccountOrdersTableRow from '../account/ecommerce-account-orders-table-row';
 import EcommerceAccountOrdersTableHead from '../account/ecommerce-account-orders-table-head';
 import EcommerceAccountOrdersTableToolbar from '../account/ecommerce-account-orders-table-toolbar';
+import { fetchOrders } from 'src/apis/order/order-list';
+import { ListOrderRes } from 'src/types/order';
 
 // ----------------------------------------------------------------------
 
@@ -59,6 +61,28 @@ export default function EcommerceAccountOrdersPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  //--//
+  const [orderTable, setOrderTable] = useState<ListOrderRes[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAccountOrder = useCallback(async () => {
+    setError(null);
+
+    try {
+      const response = await fetchOrders({ page: (page + 1).toString(), limit: rowsPerPage.toString() });
+      setOrderTable(response.data);
+    } catch (error) {
+      console.error('Error fetching order:', error);
+      setError('Đã xảy ra lỗi khi tải danh sách đơn hàng.');
+    }
+  }, [page, rowsPerPage]);
+
+  useEffect(() => {
+    fetchAccountOrder();
+  }, [fetchAccountOrder])
+
+  //--//
+
   const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
     setTab(newValue);
   }, []);
@@ -76,7 +100,7 @@ export default function EcommerceAccountOrdersPage() {
 
   const handleSelectAllRows = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = _productsTable.map((n) => n.id);
+      const newSelected = orderTable.map((n) => n.id);
       setSelected(newSelected);
       return;
     }
@@ -119,7 +143,7 @@ export default function EcommerceAccountOrdersPage() {
     setDense(event.target.checked);
   }, []);
 
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - _productsTable.length) : 0;
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - orderTable.length) : 0;
 
   return (
     <>
@@ -171,7 +195,7 @@ export default function EcommerceAccountOrdersPage() {
         }}
       >
         <EcommerceAccountOrdersTableToolbar
-          rowCount={_productsTable.length}
+          rowCount={orderTable.length}
           numSelected={selected.length}
           onSelectAllRows={handleSelectAllRows}
         />
@@ -188,21 +212,21 @@ export default function EcommerceAccountOrdersPage() {
               orderBy={orderBy}
               onSort={handleSort}
               headCells={TABLE_HEAD}
-              rowCount={_productsTable.length}
+              rowCount={orderTable.length}
               numSelected={selected.length}
               onSelectAllRows={handleSelectAllRows}
             />
 
             <TableBody>
-              {stableSort(_productsTable, getComparator(order, orderBy))
+              {stableSort(orderTable, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => (
                   <EcommerceAccountOrdersTableRow
-                    key={row.id}
-                    row={row}
-                    selected={selected.includes(row.id)}
-                    onSelectRow={() => handleSelectRow(row.id)}
-                  />
+                  key={row.id}
+                  row={row}
+                  selected={selected.includes(row.id)}
+                  onSelectRow={() => handleSelectRow(row.id)}
+                />
                 ))}
 
               {emptyRows > 0 && (
@@ -223,7 +247,7 @@ export default function EcommerceAccountOrdersPage() {
         <TablePagination
           page={page}
           component="div"
-          count={_productsTable.length}
+          count={orderTable.length}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
           rowsPerPageOptions={[5, 10, 25]}

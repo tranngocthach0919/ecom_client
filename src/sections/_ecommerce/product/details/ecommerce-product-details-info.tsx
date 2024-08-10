@@ -19,6 +19,8 @@ import { CartContext, CartContextItemProps } from 'src/contexts/cart-context';
 import ProductColorPicker from '../../common/product-color-picker';
 import ProductPrice from '../../common/product-price';
 import { fetchCarts } from 'src/apis/carts/cart-list-api';
+import { Alert, Snackbar } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 // ----------------------------------------------------------------------
 
@@ -63,22 +65,27 @@ export default function EcommerceProductDetailsInfo({
   colors
 }: Props) {
   const mdUp = useResponsive('up', 'md');
+  const router = useRouter();
   const [memory, setMemory] = useState('128gb');
   const [quantity, setQuantity] = useState(1);
+  const [open, setOpen] = useState(false);
 
   const { dispatch, addToCart } = useContext(CartContext);
 
   const handleAddToCart = async () => {
-    const addCartData = {
-      quantity: quantity,
-      product: { id: id }
-      // attribute: color, 
-    };
-    
-    addToCart(addCartData);
+    try {
+      const addCartData = {
+        quantity: quantity,
+        product: { id: id }
+        // attribute: color, 
+      };
 
-    const cartsList = await fetchCarts();
-    dispatch({ type: "SET_CART_ITEMS", payload: cartsList });
+      addToCart(addCartData);
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        setOpen(true);
+      }
+    }
   };
 
 
@@ -92,6 +99,19 @@ export default function EcommerceProductDetailsInfo({
 
   return (
     <>
+      <Snackbar
+        open={open}
+        autoHideDuration={1000}
+        onClose={() => setOpen(false)}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <Alert onClose={() => setOpen(false)} severity="error" sx={{ width: '100%' }}>
+          Bạn cần phải đăng nhập để thêm vào giỏ hàng <Button onClick={() => router.push('/login')}>Đăng nhập</Button>
+        </Alert>
+      </Snackbar>
       <Label color="success" sx={{ mb: 3 }}>
         In Stock
       </Label>

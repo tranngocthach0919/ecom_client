@@ -3,10 +3,10 @@ import Stack from '@mui/material/Stack';
 import Scrollbar from 'src/components/scrollbar';
 
 
+import { useContext } from 'react';
+import { CartContext } from 'src/contexts/cart-context';
 import { CartItemProps } from 'src/types/cart';
 import EcommerceCartItem from './ecommerce-cart-item';
-import { useContext, useEffect } from 'react';
-import { CartContext } from 'src/contexts/cart-context';
 
 // ----------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ type Props = {
 
 export default function EcommerceCartList({ wishlist = false }: Props) {
   const { cartItems } = useContext(CartContext);
-  const carts = [...cartItems] 
+  const carts = Array.isArray(cartItems) ? [...cartItems] : [];
 
   return (
     <Scrollbar>
@@ -38,9 +38,9 @@ export default function EcommerceCartList({ wishlist = false }: Props) {
           {wishlist && <Stack sx={{ width: 36 }} />}
         </Stack>
 
-        {carts?.map((cart) => (
+        {carts.length > 0 ? carts?.map((cart) => (
           <EcommerceCartItem key={cart.id} cart={cart as CartItemProps} wishlist={wishlist} />
-        ))}
+        )) : <p>Nothing...</p> }
       </Scrollbar>
   );
 }

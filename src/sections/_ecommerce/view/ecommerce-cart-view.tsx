@@ -11,26 +11,65 @@ import { paths } from 'src/routes/paths';
 
 import Iconify from 'src/components/iconify';
 
-import { useContext, useEffect } from 'react';
-import { CartContext, CartProvider } from 'src/contexts/cart-context';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { fetchCarts } from 'src/apis/carts/cart-list-api';
 import { useBoolean } from 'src/hooks/use-boolean';
 import EcommerceCartList from '../cart/ecommerce-cart-list';
 import EcommerceCartSummary from '../cart/ecommerce-cart-summary';
-import { CartItemProps } from 'src/types/cart';
-
 // ----------------------------------------------------------------------
 
+import { Alert, Snackbar } from '@mui/material';
 export default function EcommerceCartView() {
-  const { cartItems } = useContext(CartContext);
+  const [open, setOpen] = useState(false);
+
+  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
+
+  const router = useRouter();
+
+  const fetchCartsData = async () => {
+    try {
+      const response = await fetchCarts();
+      console.log(response);
+    } catch (error) {
+      if (error.response.status === 401) {
+        setOpen(true);
+      }
+    }
+  }
 
   const loading = useBoolean(true);
 
   useEffect(() => {
+    fetchCartsData()
     loading.onFalse();
-  }, [cartItems]);
+  }, []);
 
   return (
-    <CartProvider>
+    <>
+      <Snackbar open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        sx={{
+          top: '50%',
+          transform: 'translateY(-50%)',
+        }}
+      >
+        <Alert onClose={handleClose} severity="error" sx={{
+          width: '200%'
+        }}>
+          Bạn cần phải đăng nhập để xem giỏ hàng <Button onClick={() => router.push('/login')}>Đăng nhập</Button>
+        </Alert>
+      </Snackbar>
       <Container
         sx={{
           overflow: 'hidden',
@@ -67,6 +106,6 @@ export default function EcommerceCartView() {
           Continue Shopping
         </Button>
       </Container>
-    </CartProvider>
+    </>
   );
 }

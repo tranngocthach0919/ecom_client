@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useEffect, useReducer, useState } from "react";
 import { AddToCart } from "src/apis/carts/add-to-cart-api";
 import { fetchCarts } from "src/apis/carts/cart-list-api";
@@ -110,7 +112,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     fetchCartsData();
-  }, []);
+  }, [trigger]);
 
   const addToCart = async (product: CartContextItemProps) => {
     try {
@@ -130,8 +132,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         })
         dispatch({ type: "SET_CART_ITEMS", payload: cartsList });
         setTrigger(prev => prev + 1);
-      } else {
-        console.error("Failed to add to cart");
       }
     } catch (error) {
       console.error("Failed to add to cart:", error);
@@ -148,8 +148,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         const cartsList = await fetchCarts();
         dispatch({ type: "SET_CART_ITEMS", payload: cartsList });
         setTrigger(prev => prev + 1);
-      } else {
-        console.error("Failed to update cart item");
       }
     } catch (err) {
       throw new Error("Error updating cart item:", err);

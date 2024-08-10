@@ -3,13 +3,14 @@ import 'src/global.css';
 
 // ----------------------------------------------------------------------
 
+import { LocalizationProvider } from 'src/locales';
 import ThemeProvider from 'src/theme';
 import { primaryFont } from 'src/theme/typography';
-import { LocalizationProvider } from 'src/locales';
 
-import ProgressBar from 'src/components/progress-bar';
 import { MotionLazy } from 'src/components/animate/motion-lazy';
+import ProgressBar from 'src/components/progress-bar';
 import { SettingsDrawer, SettingsProvider } from 'src/components/settings';
+import { CartProvider } from 'src/contexts/cart-context';
 
 // ----------------------------------------------------------------------
 
@@ -44,11 +45,13 @@ export default function RootLayout({ children }: Props) {
             }}
           >
             <ThemeProvider>
-              <MotionLazy>
-                <ProgressBar />
-                <SettingsDrawer />
-                {children}
-              </MotionLazy>
+              <CartProvider>
+                <MotionLazy>
+                  <ProgressBar />
+                  <SettingsDrawer />
+                  {children}
+                </MotionLazy>
+              </CartProvider>
             </ThemeProvider>
           </SettingsProvider>
         </LocalizationProvider>

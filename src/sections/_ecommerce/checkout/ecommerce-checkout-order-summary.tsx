@@ -16,24 +16,27 @@ import Iconify from 'src/components/iconify';
 import TextMaxLine from 'src/components/text-max-line';
 
 import { IProductItemProps } from 'src/types/product';
+import { CartItemProps } from 'src/types/cart';
+import { useContext, useState } from 'react';
+import { CartContext, CartTriggerContext } from 'src/contexts/cart-context';
 
 // ----------------------------------------------------------------------
 
 type Props = {
   total: number;
-  subtotal: number;
+  subtotal?: number;
   shipping: number;
   discount: number;
-  products?: IProductItemProps[];
+  carts: CartItemProps[];
   loading?: boolean;
 };
 
 export default function EcommerceCheckoutOrderSummary({
   total,
-  subtotal,
+  // subtotal,
   shipping,
   discount,
-  products,
+  carts,
   loading,
 }: Props) {
   return (
@@ -47,10 +50,10 @@ export default function EcommerceCheckoutOrderSummary({
     >
       <Typography variant="h6"> Order Summary </Typography>
 
-      {!!products?.length && (
+      {!!carts?.length && (
         <>
-          {products.map((product) => (
-            <ProductItem key={product.id} product={product} />
+          {carts.map((cart) => (
+            <ProductItem key={cart.id} cart={cart} />
           ))}
 
           <Divider sx={{ borderStyle: 'dashed' }} />
@@ -58,11 +61,11 @@ export default function EcommerceCheckoutOrderSummary({
       )}
 
       <Stack spacing={2}>
-        <Row label="Subtotal" value={fCurrency(subtotal)} />
+        <Row label="Subtotal" value={fCurrency(total)} />
 
-        <Row label="Shipping" value={fCurrency(shipping)} />
+        <Row label="Shipping" value={fCurrency(total ? shipping : 0)} />
 
-        <Row label="Discount (15%)" value={`-${fCurrency(discount)}`} />
+        <Row label="Discount (15%)" value={`-${fCurrency(total ? discount : 0)}`} />
       </Stack>
 
       <TextField
@@ -104,14 +107,47 @@ export default function EcommerceCheckoutOrderSummary({
 // ----------------------------------------------------------------------
 
 type ProductItemProps = StackProps & {
-  product: IProductItemProps;
+  cart: CartItemProps;
 };
 
-function ProductItem({ product, ...other }: ProductItemProps) {
+function ProductItem({ cart, ...other }: ProductItemProps) {
+  const { updateCartItem, deleteCartItem } = useContext(CartContext);
+  
+  const [quantity, setQuantity] = useState<number>(cart.quantity);
+
+  const handleChangeQuantity = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuantity = parseInt(event.target.value, 10);
+
+    if (!isNaN(newQuantity) && newQuantity > 0) {
+      try {
+        const updateData = {
+          id: cart.id,
+          productId: cart.product.id as string,
+          quantity: newQuantity,
+          attribute: cart.attribute,
+          product: {
+            id: cart.product.id as string
+          }
+        };
+        updateCartItem({...updateData});
+        setQuantity(newQuantity);     
+      } catch (error) {
+        console.error("Error updating cart quantity:", error);
+      }
+    }
+  };
+
+  const handleRemoveCartItem = async () => {
+    try {
+      deleteCartItem(cart.id);
+    } catch (error) {
+      console.error("Error removing cart item:", error);
+    }
+  };
   return (
     <Stack direction="row" alignItems="flex-start" {...other}>
       <Image
-        src={product.coverUrl}
+        src={cart.product.images?.[0]}
         sx={{
           mr: 2,
           width: 64,
@@ -124,11 +160,11 @@ function ProductItem({ product, ...other }: ProductItemProps) {
 
       <Stack flexGrow={1}>
         <TextMaxLine variant="body2" line={1} sx={{ fontWeight: 'fontWeightMedium' }}>
-          {product.name}
+          {cart.product.name}
         </TextMaxLine>
 
         <Typography variant="subtitle2" sx={{ mt: 0.5, mb: 1.5 }}>
-          {fCurrency(product.price)}
+          {fCurrency(Number(cart.product.salePrice)*quantity)}
         </Typography>
 
         <TextField
@@ -139,6 +175,8 @@ function ProductItem({ product, ...other }: ProductItemProps) {
             native: true,
           }}
           sx={{ width: 80 }}
+          defaultValue={quantity}
+          onChange={handleChangeQuantity}
         >
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((option) => (
             <option key={option} value={option}>
@@ -148,7 +186,7 @@ function ProductItem({ product, ...other }: ProductItemProps) {
         </TextField>
       </Stack>
 
-      <IconButton>
+      <IconButton onClick={handleRemoveCartItem}>
         <Iconify icon="carbon:trash-can" />
       </IconButton>
     </Stack>

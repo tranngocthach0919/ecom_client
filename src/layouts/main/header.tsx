@@ -16,9 +16,9 @@ import { useResponsive } from 'src/hooks/use-responsive';
 import Iconify from 'src/components/iconify';
 import { bgBlur } from 'src/theme/css';
 
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { fetchCarts } from 'src/apis/carts/cart-list-api';
-import { CartContext, CartProvider, CartTriggerContext } from 'src/contexts/cart-context';
+import { CartContext, CartTriggerContext } from 'src/contexts/cart-context';
 import HeaderShadow from '../common/header-shadow';
 import { HEADER } from '../config-layout';
 import { navConfig } from './config-navigation';
@@ -32,20 +32,26 @@ type Props = {
 };
 
 export default function Header({ headerOnDark }: Props) {
-  const { cartItems, dispatch } = useContext(CartContext);
-  
-const triggerContext = useContext(CartTriggerContext) as { trigger: number };
+  const { dispatch } = useContext(CartContext);
+  const [cartQuantity, setCartQuantity] = useState(0);
 
-  const cartQuantity = cartItems.length || 0;
+  const { trigger }: any = useContext(CartTriggerContext)
 
   const fetchData = async () => {
-    const cartsList = await fetchCarts();
-    dispatch({ type: "SET_CART_ITEMS", payload: cartsList });
+    try {
+      const cartsList = await fetchCarts();
+      dispatch({ type: "SET_CART_ITEMS", payload: cartsList });
+      setCartQuantity(cartsList.length);
+    } catch (error) {
+      if (error.response.status === 401) {
+        setCartQuantity(0)
+      }
+    }
   }
 
   useEffect(() => {
     fetchData()
-  }, [triggerContext.trigger]);
+  }, [trigger]);
 
   const theme = useTheme();
 
@@ -114,7 +120,7 @@ const triggerContext = useContext(CartTriggerContext) as { trigger: number };
   );
 
   return (
-    <CartProvider>
+    <>
       <AppBar>
         <Toolbar
           disableGutters
@@ -153,6 +159,6 @@ const triggerContext = useContext(CartTriggerContext) as { trigger: number };
 
         {offset && <HeaderShadow />}
       </AppBar>
-    </CartProvider>
+    </>
   );
 }

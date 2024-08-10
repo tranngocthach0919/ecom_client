@@ -2,21 +2,20 @@
 
 import { useEffect } from 'react';
 
-import Grid from '@mui/material/Unstable_Grid2';
 import Container from '@mui/material/Container';
+import Grid from '@mui/material/Unstable_Grid2';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
 // import { _products } from 'src/_mock';
 
-import { SplashScreen } from 'src/components/loading-screen';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { SplashScreen } from 'src/components/loading-screen';
 
-import EcommerceProductDetailsInfo from '../product/details/ecommerce-product-details-info';
+import { IProductItemProps } from 'src/types/product';
 import EcommerceProductDetailsCarousel from '../product/details/ecommerce-product-details-carousel';
 import EcommerceProductDetailsDescription from '../product/details/ecommerce-product-details-description';
-import { IProductItemProps } from 'src/types/product';
-import { CartProvider } from 'src/contexts/cart-context';
+import EcommerceProductDetailsInfo from '../product/details/ecommerce-product-details-info';
 
 // ----------------------------------------------------------------------
 

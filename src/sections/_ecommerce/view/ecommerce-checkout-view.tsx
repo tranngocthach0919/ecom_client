@@ -29,7 +29,7 @@ import EcommerceCheckoutPaymentMethod from '../checkout/ecommerce-checkout-payme
 import EcommerceCheckoutShippingMethod from '../checkout/ecommerce-checkout-shipping-method';
 import EcommerceCheckoutShippingDetails from '../checkout/ecommerce-checkout-shipping-details';
 import EcommerceCheckoutPersonalDetails from '../checkout/ecommerce-checkout-personal-details';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CartContext } from 'src/contexts/cart-context';
 import { CartItemProps } from 'src/types/cart';
 
@@ -65,7 +65,19 @@ const PAYMENT_OPTIONS = [
 // ----------------------------------------------------------------------
 
 export default function EcommerceCheckoutView() {
+
   const { cartItems } = useContext(CartContext);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    const newTotal = cartItems?.reduce(
+      (acc, cart) =>
+        acc + parseFloat(cart.product.salePrice as string) * cart.quantity,
+      0
+    );
+    setTotal(newTotal);
+  }, [cartItems]);
+
   const router = useRouter();
 
   const formOpen = useBoolean();
@@ -179,8 +191,8 @@ export default function EcommerceCheckoutView() {
 
           <Grid xs={12} md={4}>
             <EcommerceCheckoutOrderSummary
-              total={357.09}
-              subtotal={89.09}
+              total={total}
+              // subtotal={total}
               shipping={55.47}
               discount={16.17}
               carts={cartItems.slice(0, 3) as CartItemProps[]}

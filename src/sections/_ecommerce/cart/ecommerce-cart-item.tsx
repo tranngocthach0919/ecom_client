@@ -13,7 +13,7 @@ import Image from 'src/components/image';
 import { CartItemProps } from 'src/types/cart';
 // import { Input } from '@mui/material';
 import { useContext, useState } from 'react';
-import { CartContext } from 'src/contexts/cart-context';
+import { CartContext, CartTriggerContext } from 'src/contexts/cart-context';
 
 // ----------------------------------------------------------------------
 
@@ -24,6 +24,7 @@ type Props = {
 
 export default function EcommerceCartItem({ cart, wishlist }: Props) {
   const { updateCartItem, deleteCartItem } = useContext(CartContext);
+  const { setTrigger }: any = useContext(CartTriggerContext);
   
   const [quantity, setQuantity] = useState<number>(cart.quantity);
 
@@ -43,6 +44,7 @@ export default function EcommerceCartItem({ cart, wishlist }: Props) {
         };
         updateCartItem({...updateData});
         setQuantity(newQuantity);
+        setTrigger(Math.random())        
       } catch (error) {
         console.error("Error updating cart quantity:", error);
       }
@@ -52,6 +54,7 @@ export default function EcommerceCartItem({ cart, wishlist }: Props) {
   const handleRemoveCartItem = async () => {
     try {
       deleteCartItem(cart.id);
+      setTrigger(Math.random())
     } catch (error) {
       console.error("Error removing cart item:", error);
     }

@@ -24,15 +24,15 @@ type Props = {
 
 export default function EcommerceCartSummary({ tax = 0, shipping = 55.47, discount = 16.17 }: Props) {
   const { cartItems } = useContext(CartContext);
-  const [subtotal, setSubtotal] = useState(0);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    const newSubtotal = cartItems?.reduce(
+    const newTotal = cartItems?.reduce(
       (acc, cart) =>
         acc + parseFloat(cart.product.salePrice as string) * cart.quantity,
       0
     );
-    setSubtotal(newSubtotal);
+    setTotal(newTotal);
   }, [cartItems]);
 
   return (
@@ -47,11 +47,11 @@ export default function EcommerceCartSummary({ tax = 0, shipping = 55.47, discou
       <Typography variant="h6"> Summary </Typography>
 
       <Stack spacing={2}>
-        <Row label="Subtotal" value={fCurrency(subtotal)} />
+        <Row label="Subtotal" value={fCurrency(total)} />
 
-        <Row label="Shipping" value={fCurrency(subtotal ? shipping : 0)} />
+        <Row label="Shipping" value={fCurrency(total ? shipping : 0)} />
         
-        <Row label="Discount" value={fCurrency(subtotal ? discount: 0)} />
+        <Row label="Discount" value={fCurrency(total ? discount: 0)} />
       </Stack>
 
       {/* <TextField
@@ -70,7 +70,7 @@ export default function EcommerceCartSummary({ tax = 0, shipping = 55.47, discou
 
       <Row
         label="Total"
-        value={fCurrency(subtotal ? subtotal + shipping - discount : 0)}
+        value={fCurrency(total ? total + shipping - discount : 0)}
         sx={{
           typography: 'h6',
           '& span': { typography: 'h6' },
@@ -83,6 +83,7 @@ export default function EcommerceCartSummary({ tax = 0, shipping = 55.47, discou
         size="large"
         variant="contained"
         color="inherit"
+        disabled={cartItems.length === 0}
       >
         Checkout
       </Button>

@@ -4,6 +4,9 @@ import Stack from '@mui/material/Stack';
 
 import { IProductItemProps } from 'src/types/product';
 
+import { useContext, useEffect } from 'react';
+import FilterContext from 'src/contexts/filter-context';
+import { defaultValues } from '../filters/ecommerce-filters';
 import EcommerceProductViewGridItem from '../item/ecommerce-product-view-grid-item';
 import EcommerceProductViewGridItemSkeleton from '../item/ecommerce-product-view-grid-item-skeleton';
 import EcommerceProductViewListItem from '../item/ecommerce-product-view-list-item';
@@ -18,6 +21,26 @@ type Props = {
 };
 
 export default function EcommerceProductList({ loading, viewMode, products }: Props) {
+  const filterContextValue = useContext(FilterContext); 
+  const filters = filterContextValue ? filterContextValue.filters : defaultValues;
+  
+
+  const filteredProducts = products.filter((product) => {
+    return (
+      (filters.filterCategories === '' || product.category.name === filters.filterCategories) 
+      &&
+      (filters.filterBrand === '' || (product.brand.name === filters.filterBrand)) 
+      && 
+      (product.price >= filters.filterPrice.start && product.price <= filters.filterPrice.end) 
+      &&
+      (!filters.filterStock || product.quantity > 0) 
+    );
+  });
+  console.log(filters);
+  
+
+  useEffect(() => {}, [filters, filteredProducts])
+  
   return (
     <>
       {viewMode === 'grid' ? (
@@ -31,7 +54,7 @@ export default function EcommerceProductList({ loading, viewMode, products }: Pr
             md: 'repeat(4, 1fr)',
           }}
         >
-          {(loading ? [...Array(16)] : products).map((product, index) =>
+          {(loading ? [...Array(16)] : filteredProducts).map((product, index) =>
             product ? (
               <EcommerceProductViewGridItem key={product.id} product={product} />
             ) : (
@@ -41,7 +64,7 @@ export default function EcommerceProductList({ loading, viewMode, products }: Pr
         </Box>
       ) : (
         <Stack spacing={4}>
-          {(loading ? [...Array(16)] : products).map((product, index) =>
+          {(loading ? [...Array(16)] : filteredProducts).map((product, index) =>
             product ? (
               <EcommerceProductViewListItem key={product.id} product={product} />
             ) : (

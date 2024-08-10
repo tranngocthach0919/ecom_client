@@ -36,7 +36,8 @@ export type IProductItemProps = {
 export type IProductFiltersProps = {
   filterTag: string[];
   filterStock: boolean;
-  filterBrand: string[];
+  // filterBrand: string[];
+  filterBrand: string;
   filterShipping: string[];
   filterCategories: string;
   filterRating: string | null;

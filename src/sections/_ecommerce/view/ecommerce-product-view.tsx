@@ -35,6 +35,8 @@ export default function EcommerceProductView({ product }: { product: IProductIte
   if (loading.value) {
     return <SplashScreen />;
   }
+  console.log(product);
+  
 
   return (
     <>

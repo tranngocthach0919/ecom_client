@@ -17,9 +17,11 @@ import { fetchProducts } from 'src/apis/products/product-api';
 
 import Iconify from 'src/components/iconify';
 
-import EcommerceFilters from '../product/filters/ecommerce-filters';
+import FilterContext from 'src/contexts/filter-context';
+import EcommerceFilters, { defaultValues } from '../product/filters/ecommerce-filters';
 import EcommerceProductList from '../product/list/ecommerce-product-list';
 import EcommerceProductListBestSellers from '../product/list/ecommerce-product-list-best-sellers';
+import { IProductFiltersProps } from 'src/types/product';
 
 // ----------------------------------------------------------------------
 
@@ -31,6 +33,11 @@ const VIEW_OPTIONS = [
 // ----------------------------------------------------------------------
 
 export default function EcommerceProductsView() {
+// --
+
+const [filters, setFilters] = useState<IProductFiltersProps>(defaultValues);
+
+// --
   const [products, setProducts] = useState([]);
   const mobileOpen = useBoolean();
 
@@ -62,72 +69,74 @@ export default function EcommerceProductsView() {
   );
 
   return (
-    <Container>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{
-          py: 5,
-        }}
-      >
-        <Typography variant="h3">Catalog</Typography>
-
-        <Button
-          color="inherit"
-          variant="contained"
-          startIcon={<Iconify icon="carbon:filter" width={18} />}
-          onClick={mobileOpen.onTrue}
+    <FilterContext.Provider value={{ filters, setFilters }}>
+      <Container>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
           sx={{
-            display: { md: 'none' },
+            py: 5,
           }}
         >
-          Filters
-        </Button>
-      </Stack>
+          <Typography variant="h3">Catalog</Typography>
 
-      <Stack
-        direction={{
-          xs: 'column-reverse',
-          md: 'row',
-        }}
-        sx={{ mb: { xs: 8, md: 10 } }}
-      >
-        <Stack spacing={5} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
-          <EcommerceFilters open={mobileOpen.value} onClose={mobileOpen.onFalse} />
-          <EcommerceProductListBestSellers products={products.slice(0, 3)} />
+          <Button
+            color="inherit"
+            variant="contained"
+            startIcon={<Iconify icon="carbon:filter" width={18} />}
+            onClick={mobileOpen.onTrue}
+            sx={{
+              display: { md: 'none' },
+            }}
+          >
+            Filters
+          </Button>
         </Stack>
 
-        <Box
-          sx={{
-            flexGrow: 1,
-            pl: { md: 8 },
-            width: { md: `calc(100% - ${280}px)` },
+        <Stack
+          direction={{
+            xs: 'column-reverse',
+            md: 'row',
           }}
+          sx={{ mb: { xs: 8, md: 10 } }}
         >
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
-            <ToggleButtonGroup
-              exclusive
-              size="small"
-              value={viewMode}
-              onChange={handleChangeViewMode}
-              sx={{ borderColor: 'transparent' }}
-            >
-              {VIEW_OPTIONS.map((option) => (
-                <ToggleButton key={option.value} value={option.value}>
-                  {option.icon}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
+          <Stack spacing={5} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
+            <EcommerceFilters open={mobileOpen.value} onClose={mobileOpen.onFalse} />
+            <EcommerceProductListBestSellers products={products.slice(0, 3)} />
           </Stack>
 
-          <EcommerceProductList
-            loading={loading.value}
-            viewMode={viewMode}
-            products={products.slice(0, 14)}
-          />
-        </Box>
-      </Stack>
-    </Container>
+          <Box
+            sx={{
+              flexGrow: 1,
+              pl: { md: 8 },
+              width: { md: `calc(100% - ${280}px)` },
+            }}
+          >
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
+              <ToggleButtonGroup
+                exclusive
+                size="small"
+                value={viewMode}
+                onChange={handleChangeViewMode}
+                sx={{ borderColor: 'transparent' }}
+              >
+                {VIEW_OPTIONS.map((option) => (
+                  <ToggleButton key={option.value} value={option.value}>
+                    {option.icon}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Stack>
+
+            <EcommerceProductList
+              loading={loading.value}
+              viewMode={viewMode}
+              products={products.slice(0, 14)}
+            />
+          </Box>
+        </Stack>
+      </Container>
+    </FilterContext.Provider>
   );
 }

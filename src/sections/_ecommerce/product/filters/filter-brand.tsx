@@ -6,7 +6,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 interface Props extends StackProps {
   options: string[];
-  filterBrand: string[];
+  filterBrand: string;
   onChangeBrand: (name: string) => void;
 }
 

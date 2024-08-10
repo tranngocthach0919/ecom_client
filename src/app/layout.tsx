@@ -11,6 +11,7 @@ import { MotionLazy } from 'src/components/animate/motion-lazy';
 import ProgressBar from 'src/components/progress-bar';
 import { SettingsDrawer, SettingsProvider } from 'src/components/settings';
 import { CartProvider } from 'src/contexts/cart-context';
+import { FilterProvider } from 'src/contexts/filter-context';
 
 // ----------------------------------------------------------------------
 
@@ -46,11 +47,13 @@ export default function RootLayout({ children }: Props) {
           >
             <ThemeProvider>
               <CartProvider>
-                <MotionLazy>
-                  <ProgressBar />
-                  <SettingsDrawer />
-                  {children}
-                </MotionLazy>
+                <FilterProvider>
+                  <MotionLazy>
+                    <ProgressBar />
+                    <SettingsDrawer />
+                    {children}
+                  </MotionLazy>
+                </FilterProvider>
               </CartProvider>
             </ThemeProvider>
           </SettingsProvider>

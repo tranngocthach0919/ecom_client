@@ -1,25 +1,24 @@
 'use client';
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 
-import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
-import Typography from '@mui/material/Typography';
+import Drawer from '@mui/material/Drawer';
 import Stack, { StackProps } from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import Iconify from 'src/components/iconify';
 
-import { IProductFiltersProps } from 'src/types/product';
-
-import FilterPrice from './filter-price';
-import FilterBrand from './filter-brand';
-import FilterStock from './filter-stock';
-import FilterCategory from './filter-category';
 import { fetchBrands } from 'src/apis/brand/brand-api';
 import { fetchCategories } from 'src/apis/categories/category-api';
+import FilterContext from 'src/contexts/filter-context';
+import FilterBrand from './filter-brand';
+import FilterCategory from './filter-category';
+import FilterPrice from './filter-price';
+import FilterStock from './filter-stock';
 
 // ----------------------------------------------------------------------
 
@@ -29,8 +28,9 @@ const CATEGORY_OPTIONS: string[] = [];
 
 // ----------------------------------------------------------------------
 
-const defaultValues = {
-  filterBrand: [BRAND_OPTIONS[0]],
+export const defaultValues = {
+  // filterBrand: [BRAND_OPTIONS[0]],
+  filterBrand: '',
   filterCategories: '',
   filterRating: null,
   filterStock: false,
@@ -50,7 +50,13 @@ type Props = {
 export default function EcommerceFilters({ open, onClose }: Props) {
   const mdUp = useResponsive('up', 'md');
 
-  const [filters, setFilters] = useState<IProductFiltersProps>(defaultValues);
+  const filterContext  = useContext(FilterContext);
+
+  if (!filterContext) {
+    throw new Error('FilterContext.Provider is missing');
+  }
+
+  const { filters, setFilters } = filterContext;
 
   const getSelected = (selectedItems: string[], item: string) =>
     selectedItems.includes(item)
@@ -71,7 +77,7 @@ export default function EcommerceFilters({ open, onClose }: Props) {
     (name: string) => {
       setFilters({
         ...filters,
-        filterBrand: getSelected(filters.filterBrand, name),
+        filterBrand: name,
       });
     },
     [filters]
@@ -230,7 +236,7 @@ export default function EcommerceFilters({ open, onClose }: Props) {
   );
 
   return (
-    <>
+    <FilterContext.Provider value={{ filters, setFilters }}>
       {mdUp ? (
         renderContent
       ) : (
@@ -249,7 +255,7 @@ export default function EcommerceFilters({ open, onClose }: Props) {
           {renderContent}
         </Drawer>
       )}
-    </>
+    </FilterContext.Provider>
   );
 }
 
